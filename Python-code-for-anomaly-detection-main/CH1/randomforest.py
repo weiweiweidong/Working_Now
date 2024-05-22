@@ -1,12 +1,15 @@
+"""
+随机森林，使用了决策树
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-class DecisionTree():
+class DecisionTree:
     def __init__(self, split_minimum=2, depth_maximum=100):
         self.split_minimum = split_minimum
         self.depth_maximum = depth_maximum
-
 
     def tree_arrangement(self, inputs, node):
         if node.val is not None:
@@ -15,12 +18,10 @@ class DecisionTree():
             return self.tree_arrangement(inputs, node.left)
         return self.tree_arrangement(inputs, node.right)
 
-
     def entropy(self, target):
         _, hist = np.unique(target, return_counts=True)
         p = hist / len(target)
         return -np.sum(p * np.log2(p))
-
 
     def tree_growth(self, inputs, target, depth=0):
         samples = inputs.shape[0]
@@ -50,7 +51,9 @@ class DecisionTree():
                 e_left = self.entropy(target[idx_left])
                 e_right = self.entropy(target[idx_right])
                 n_left, n_right = len(idx_left), len(idx_right)
-                weighted_average_entropy = e_left * (n_left / samples) + e_right * (n_right / samples)
+                weighted_average_entropy = e_left * (n_left / samples) + e_right * (
+                    n_right / samples
+                )
                 gain = original_entropy - weighted_average_entropy
             if gain > best_gain:
                 index_left = idx_left
@@ -61,20 +64,22 @@ class DecisionTree():
         if best_gain == 0:
             return Tree_Node(val=np.mean(target))
 
-        left_node = self.tree_growth(inputs[index_left], target[index_left], depth+1)
-        right_node = self.tree_growth(inputs[index_right], target[index_right], depth+1)
+        left_node = self.tree_growth(inputs[index_left], target[index_left], depth + 1)
+        right_node = self.tree_growth(
+            inputs[index_right], target[index_right], depth + 1
+        )
         return Tree_Node(threshhold_best, left_node, right_node)
-
 
     def fit(self, inputs, target):
         self.root_node = self.tree_growth(inputs, target)
 
-
     def predict(self, inputs):
-        return np.array([self.tree_arrangement(input_, self.root_node) for input_ in inputs])
+        return np.array(
+            [self.tree_arrangement(input_, self.root_node) for input_ in inputs]
+        )
 
 
-class Tree_Node():
+class Tree_Node:
     def __init__(self, thrs=None, left=None, right=None, *, val=None):
         self.thrs = thrs
         self.left = left
@@ -82,26 +87,23 @@ class Tree_Node():
         self.val = val
 
 
-class RandomForest():
+class RandomForest:
     def __init__(self, t_numbers=10, split_minimum=5, depth_maximum=100):
         self.t_numbers = t_numbers
         self.split_minimum = split_minimum
         self.depth_maximum = depth_maximum
 
-
     def fit(self, inputs, target, node_num=10):
         self.use_trees = []
-        for  _ in range(self.t_numbers):
+        for _ in range(self.t_numbers):
             tree = DecisionTree(self.split_minimum, self.depth_maximum)
             x_samp, y_samp = self.sampling_bootstrap(inputs, target, node_num)
             tree.fit(x_samp, y_samp)
             self.use_trees.append(tree)
 
-
     def predict(self, inputs):
         predicts = np.array([tree.predict(inputs) for tree in self.use_trees])
         return np.mean(predicts, axis=0)
-
 
     def sampling_bootstrap(self, inputs, target, node_num):
         idx = np.random.choice(inputs.shape[0], node_num, replace=True)
@@ -110,21 +112,21 @@ class RandomForest():
 
 def main():
     # data and plot result
-    inputs = np.array([5.0, 7.0, 12.0, 20.0, 23.0, 25.0,
-                       28.0, 29.0, 34.0, 35.0, 40.0])
-    target = np.array([62.0, 60.0, 83.0, 120.0, 158.0, 172.0,
-                       167.0, 204.0, 189.0, 140.0, 166.0])
+    inputs = np.array([5.0, 7.0, 12.0, 20.0, 23.0, 25.0, 28.0, 29.0, 34.0, 35.0, 40.0])
+    target = np.array(
+        [62.0, 60.0, 83.0, 120.0, 158.0, 172.0, 167.0, 204.0, 189.0, 140.0, 166.0]
+    )
 
     plf = RandomForest(t_numbers=3, depth_maximum=2)
     plf.fit(inputs, target)
     y_pred = plf.predict(inputs)
     print(y_pred)
-    plt.scatter(inputs, target, label='data')
-    plt.step(inputs, y_pred, color='orange', label='prediction')
+    plt.scatter(inputs, target, label="data")
+    plt.step(inputs, y_pred, color="orange", label="prediction")
     plt.ylim(10, 210)
     plt.legend()
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

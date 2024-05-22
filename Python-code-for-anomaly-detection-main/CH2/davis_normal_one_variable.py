@@ -9,36 +9,43 @@ from numpy import linalg as la
 from scipy.stats import norm
 import seaborn as sns
 
+########################## 这部分是为了设置相对路径而作的改动 ##########################
+import os
+
+# 获取当前脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# 设置工作目录为当前脚本所在目录
+os.chdir(script_dir)
+# 打印当前工作目录以确认
+print("Current working directory:", os.getcwd())
+##################################################################################
 
 
-davis = pd.read_csv('./data/Davis.csv').values
-x = davis[: ,2:3]
+davis = pd.read_csv("./data/Davis.csv").values
+x = davis[:, 2:3]
 
-#plt.hist( x,color='blue',bins=200)
+# plt.hist( x,color='blue',bins=200)
 
-sns.distplot(x, fit = norm, color='k', kde=False, bins =50,rug=True)
-
+sns.distplot(x, fit=norm, color="k", kde=False, bins=50, rug=True)
 
 
 # 平均ベクトル
-#mx = x.mean(axis = 0)
+# mx = x.mean(axis = 0)
 
 # 中心化データ
-#xc = x - mx
+# xc = x - mx
 
 # 標本分散ベクトル
-#sx = ( xc.T.dot(xc) / x[:,0].size ).astype(float)
-#sx = x.std()
+# sx = ( xc.T.dot(xc) / x[:,0].size ).astype(float)
+# sx = x.std()
 
 # 標本分散ベクトルの逆数
-#sx_inv= np.linalg.inv(sx)
+# sx_inv= np.linalg.inv(sx)
 
 
-
-#plt.hist( x,color='blue',bins=200)
+# plt.hist( x,color='blue',bins=200)
 
 plt.show()
-
 
 
 """

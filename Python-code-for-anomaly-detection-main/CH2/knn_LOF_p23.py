@@ -5,115 +5,116 @@ import scipy as sp
 import scipy.stats
 from numpy import linalg as la
 
+########################## 这部分是为了设置相对路径而作的改动 ##########################
+import os
 
-davis = pd.read_csv('./data/Davis_1_2.csv').values
+# 获取当前脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# 设置工作目录为当前脚本所在目录
+os.chdir(script_dir)
+# 打印当前工作目录以确认
+print("Current working directory:", os.getcwd())
+##################################################################################
+
+
+davis = pd.read_csv("./data/Davis_1_2.csv").values
 
 
 class KNN2d:
 
     def knn2d(self):
-        cx = davis[1:60 ,2]
-        cy = davis[1:60 ,3]
-        x = cx - cx.mean(axis = 0)
-        y = cy - cy.mean(axis = 0)
+        cx = davis[1:60, 2]
+        cy = davis[1:60, 3]
+        x = cx - cx.mean(axis=0)
+        y = cy - cy.mean(axis=0)
 
-        #plt.scatter(x,y)
-
+        # plt.scatter(x,y)
 
         num = x.shape[0]
-        index_list  =   [ ]
-        p_list    =   [ ]
-        alpha_list   =   [ ]
+        index_list = []
+        p_list = []
+        alpha_list = []
 
         for j in range(num):
-            l_list = [] #k番目のデータに対するその他のデータの距離
+            l_list = []  # k番目のデータに対するその他のデータの距離
             d = 0
-            p  = 0
+            p = 0
 
             for i in range(num):
                 xl = x[i] - x[j]
                 yl = y[i] - y[j]
                 l2 = (xl) ** 2 + (yl) ** 2
-                l = l2 ** 0.5
+                l = l2**0.5
 
                 l_list.append(l)
 
-
             l_li = np.array(l_list)
             index_list = sorted(range(len(l_li)), key=lambda k: l_li[k])
-            print ('index is',index_list)
+            print("index is", index_list)
 
-            k=20
+            k = 20
 
             l_li = np.sort(l_li)
 
-            for n in range(k) :
+            for n in range(k):
                 d = d + l_li[n]
 
-            d = d/(k)
+            d = d / (k)
 
-            for m in index_list[1:k+1]:
+            for m in index_list[1 : k + 1]:
 
-                 p_list    =   [ ]
-                 print ('mis',m)
-                 for i in range(num):
-                     xl = x[i] - x[m]
-                     yl = y[i] - y[m]
-                     l2 = (xl) ** 2 + (yl) ** 2
+                p_list = []
+                print("mis", m)
+                for i in range(num):
+                    xl = x[i] - x[m]
+                    yl = y[i] - y[m]
+                    l2 = (xl) ** 2 + (yl) ** 2
 
-                     p_list.append(l2**0.5)
+                    p_list.append(l2**0.5)
 
-                 p_list = np.array(p_list)
-                 p_li = np.sort(p_list)
+                p_list = np.array(p_list)
+                p_li = np.sort(p_list)
 
+                for n in range(k):
+                    p = p + p_li[n]
+                    print("pis", p)
 
-                 for n in range(k) :
-                     p = p + p_li[n]
-                     print ('pis',p)
+            p = p / (k * k)
 
+            alpha = d / p
 
-
-            p = p/(k*k)
-
-            alpha =d/p
-
-            print ('alpha is',  alpha)
+            print("alpha is", alpha)
             alpha_list.append(alpha)
-
 
         abnormals = np.array(alpha_list)
         x = np.linspace(0, 59, 59)
 
-        plt.scatter(np.round(x),abnormals, marker =  ",",   c="green", alpha=0.2)
-        #plt.scatter(np.round(x),abnormals, marker =  "o",   c="blue",alpha=0.8)
-        plt.ylim(0.1,5)
+        plt.scatter(np.round(x), abnormals, marker=",", c="green", alpha=0.2)
+        # plt.scatter(np.round(x),abnormals, marker =  "o",   c="blue",alpha=0.8)
+        plt.ylim(0.1, 5)
 
-        print ( abnormals)
+        print(abnormals)
 
         return abnormals
 
-
     def abnormal_decision(self, abnormals):
-        treshold=0.0018
+        treshold = 0.0018
         result_list = []
 
         num = abnormals.shape[0]
-        index= sorted(range(len(abnormals)), key=lambda k: abnormals[k])
-
-
+        index = sorted(range(len(abnormals)), key=lambda k: abnormals[k])
 
         for i in range(num):
             abnormal = abnormals[i]
             if abnormal > treshold:
                 result_list.append(i)
 
-        print ( result_list)
-        print ('final results is', index)
+        print(result_list)
+        print("final results is", index)
         return result_list
 
-        
 
-ss=KNN2d()
+ss = KNN2d()
 ss.knn2d()
 ss.abnormal_decision(ss.knn2d())
 plt.show()

@@ -11,37 +11,48 @@ import seaborn as sns
 
 from matplotlib import cm
 
-davis = pd.read_csv('./data/Davis.csv').values
-#x = davis[: ,2:4]
+########################## 这部分是为了设置相对路径而作的改动 ##########################
+import os
+
+# 获取当前脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# 设置工作目录为当前脚本所在目录
+os.chdir(script_dir)
+# 打印当前工作目录以确认
+print("Current working directory:", os.getcwd())
+##################################################################################
+
+davis = pd.read_csv("./data/Davis.csv").values
+# x = davis[: ,2:4]
 
 
-d = davis[: ,2:4]
+d = davis[:, 2:4]
 
-plt.scatter( d[:,0], d[:,1],color='black')
-plt.xlim(20,180)
-plt.ylim(40,210)
-#sns.kdeplot( x[:,0], x[:,1],kernel='gaus')
+plt.scatter(d[:, 0], d[:, 1], color="black")
+plt.xlim(20, 180)
+plt.ylim(40, 210)
+# sns.kdeplot( x[:,0], x[:,1],kernel='gaus')
 
 
-x =  np.arange(20, 180,1)
-y =  np.arange(40, 210,1)
+x = np.arange(20, 180, 1)
+y = np.arange(40, 210, 1)
 X, Y = np.meshgrid(x, y)
-mx = d.mean(axis = 0)
+mx = d.mean(axis=0)
 xc = d - mx
-sx = ( xc.T.dot(xc) / d[:,0].size ).astype(float)
+sx = (xc.T.dot(xc) / d[:, 0].size).astype(float)
 f = lambda x, y: scipy.stats.multivariate_normal(mx, sx).pdf([x, y])
 Z = np.vectorize(f)(X, Y)
-plt.contour(X, Y, Z,levels=10,linewidths=1)
+plt.contour(X, Y, Z, levels=10, linewidths=1)
 plt.show()
 
 # データ中心化
-mx = d.mean(axis = 0)
+mx = d.mean(axis=0)
 xc = d - mx
 # 標本共分散行列
-sx = ( xc.T.dot(xc) / d[:,0].size ).astype(float)
-#タグチ指標の計算
-SN = (xc[20]**2 )/np.diag(sx)
+sx = (xc.T.dot(xc) / d[:, 0].size).astype(float)
+# タグチ指標の計算
+SN = (xc[20] ** 2) / np.diag(sx)
 SN = SN.astype(np.float64)
-MT = 10*np.log10(SN)
-print ('Taguchi score is:')
-print (MT)
+MT = 10 * np.log10(SN)
+print("Taguchi score is:")
+print(MT)

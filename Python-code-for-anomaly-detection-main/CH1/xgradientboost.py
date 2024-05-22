@@ -1,14 +1,17 @@
+"""
+简化版的XGBoost（Extreme Gradient Boosting）模型，其中包括一个基础的决策树类。XGBoost是一种集成学习方法，通过组合多个弱学习器（通常是决策树）来提高预测性能
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-class DecisionTree():
+class DecisionTree:
     def __init__(self, split_minimum=2, depth_maximum=100, _lambda=0.1, gamma=0.1):
         self.split_minimum = split_minimum
         self.depth_maximum = depth_maximum
         self._lambda = _lambda
         self.gamma = gamma
-
 
     def tree_arrangement(self, inputs, node):
         if node.val is not None:
@@ -16,7 +19,6 @@ class DecisionTree():
         if inputs <= node.thrs:
             return self.tree_arrangement(inputs, node.left)
         return self.tree_arrangement(inputs, node.right)
-
 
     def tree_growth(self, inputs, target, depth=0):
         samples = inputs.shape[0]
@@ -31,36 +33,45 @@ class DecisionTree():
             if len(idx_left) == 0 or len(idx_right) == 0:
                 variance = 999
             else:
-                var_left = np.sqrt(np.sum((target[idx_left] - target[idx_left].mean())**2) / (
-                    target[idx_left].shape[0] + self._lambda))
-                var_right = np.sqrt(np.sum((target[idx_right] - target[idx_right].mean())**2) / (
-                    target[idx_right].shape[0] + self._lambda))
-                variance = (var_left + target[idx_left].shape[0]*self.gamma + \
-                            var_right + target[idx_right].shape[0]*self.gamma) / 2
+                var_left = np.sqrt(
+                    np.sum((target[idx_left] - target[idx_left].mean()) ** 2)
+                    / (target[idx_left].shape[0] + self._lambda)
+                )
+                var_right = np.sqrt(
+                    np.sum((target[idx_right] - target[idx_right].mean()) ** 2)
+                    / (target[idx_right].shape[0] + self._lambda)
+                )
+                variance = (
+                    var_left
+                    + target[idx_left].shape[0] * self.gamma
+                    + var_right
+                    + target[idx_right].shape[0] * self.gamma
+                ) / 2
             if variance < best_variance:
                 index_left = idx_left
                 index_right = idx_right
                 best_variance = variance
                 threshhold_best = th
 
-
         if best_variance == 999:
             return Tree_Node(val=np.mean(target))
 
-        left_node = self.tree_growth(inputs[index_left], target[index_left], depth+1)
-        right_node = self.tree_growth(inputs[index_right], target[index_right], depth+1)
+        left_node = self.tree_growth(inputs[index_left], target[index_left], depth + 1)
+        right_node = self.tree_growth(
+            inputs[index_right], target[index_right], depth + 1
+        )
         return Tree_Node(threshhold_best, left_node, right_node)
-
 
     def fit(self, inputs, target):
         self.root_node = self.tree_growth(inputs, target)
 
-
     def predict(self, inputs):
-        return np.array([self.tree_arrangement(input_, self.root_node) for input_ in inputs])
+        return np.array(
+            [self.tree_arrangement(input_, self.root_node) for input_ in inputs]
+        )
 
 
-class Tree_Node():
+class Tree_Node:
     def __init__(self, thrs=None, left=None, right=None, *, val=None):
         self.thrs = thrs
         self.left = left
@@ -69,7 +80,15 @@ class Tree_Node():
 
 
 class XGBoost:
-    def __init__(self, t_numbers=5, depth_maximum=3, alpha=1, bagFraction=0.8, _lambda=0.1, gamma=0.1):
+    def __init__(
+        self,
+        t_numbers=5,
+        depth_maximum=3,
+        alpha=1,
+        bagFraction=0.8,
+        _lambda=0.1,
+        gamma=0.1,
+    ):
         self.t_numbers = t_numbers
         self.depth_maximum = depth_maximum
         self.alpha = alpha
@@ -77,11 +96,11 @@ class XGBoost:
         self._lambda = _lambda
         self.gamma = gamma
 
-
     def fit(self, inputs, target):
         self.use_trees = []
         tree = DecisionTree(
-            depth_maximum=self.depth_maximum, _lambda=self._lambda, gamma=self.gamma)
+            depth_maximum=self.depth_maximum, _lambda=self._lambda, gamma=self.gamma
+        )
         tree.fit(inputs, target)
         # 初期F0(x)の算出
         F0 = tree.predict(inputs)
@@ -98,14 +117,14 @@ class XGBoost:
                 x = inputs
                 y = gradient
             tree = DecisionTree(
-                depth_maximum=self.depth_maximum, _lambda=self._lambda, gamma=self.gamma)
+                depth_maximum=self.depth_maximum, _lambda=self._lambda, gamma=self.gamma
+            )
             tree.fit(x, y)
             # 式(45)の計算
             Fm += tree.predict(inputs)
             # 式(43)の計算
             gradient = self.alpha * (target - Fm)
             self.use_trees.append(tree)
-
 
     def predict(self, inputs):
         predicts = [tree.predict(inputs) for tree in self.use_trees]
@@ -114,21 +133,21 @@ class XGBoost:
 
 def main():
     # data and plot result
-    inputs = np.array([5.0, 7.0, 12.0, 20.0, 23.0, 25.0,
-                       28.0, 29.0, 34.0, 35.0, 40.0])
-    target = np.array([62.0, 60.0, 83.0, 120.0, 158.0, 172.0,
-                       167.0, 204.0, 189.0, 140.0, 166.0])
+    inputs = np.array([5.0, 7.0, 12.0, 20.0, 23.0, 25.0, 28.0, 29.0, 34.0, 35.0, 40.0])
+    target = np.array(
+        [62.0, 60.0, 83.0, 120.0, 158.0, 172.0, 167.0, 204.0, 189.0, 140.0, 166.0]
+    )
 
     plf = XGBoost(t_numbers=5, depth_maximum=3, _lambda=0, gamma=0)
     plf.fit(inputs, target)
     y_pred = plf.predict(inputs)
     print(y_pred)
-    plt.scatter(inputs, target, label='data')
-    plt.step(inputs, y_pred, color='orange', label='prediction')
-    plt.ylim(10,210)
+    plt.scatter(inputs, target, label="data")
+    plt.step(inputs, y_pred, color="orange", label="prediction")
+    plt.ylim(10, 210)
     plt.legend()
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
