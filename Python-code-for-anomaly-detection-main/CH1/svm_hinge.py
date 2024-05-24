@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 np.random.seed(1)
 
 
+# SVM 的类
 class SVM:
-
+    # 初始化
     def __init__(self, learning_rate=0.001, lambda_param=0.01, n_iters=1000):
         self.lr = learning_rate
         self.lambda_param = lambda_param
@@ -17,6 +18,7 @@ class SVM:
         self.w = None
         self.b = None
 
+    # 训练方法
     def fit(self, X, y):
         n_samples, n_features = X.shape
 
@@ -24,6 +26,7 @@ class SVM:
 
         self.w = np.zeros(n_features)
         self.b = 0
+        # SVM的参数更新
         for _ in range(self.n_iters):
             for idx, x_i in enumerate(X):
                 condition = y_[idx] * (np.dot(x_i, self.w) - self.b) >= 1
@@ -35,11 +38,13 @@ class SVM:
                     )
                     self.b -= self.lr * y_[idx]
 
+    # 预测方法
     def predict(self, X):
         approx = np.dot(X, self.w) - self.b
         return np.sign(approx)
 
 
+# 生成数据（40个样本数据，每个数据有两个feature）
 n = 40
 X, y = np.zeros((n, 2)), np.zeros(n)
 X[0:20, 0] = np.random.rand(n // 2) - 15
@@ -48,11 +53,15 @@ X[:, 1] = np.random.rand(n)
 X[0:2, 0] = X[0:2, 0] + 10
 y[0:20] = np.ones(n // 2)
 y[20::] = -np.ones(n // 2)
+
+# 训练SVM
 clf = SVM()
 clf.fit(X, y)
+# 打印训练后的权重w 和 偏置b
 print(clf.w, clf.b)
 
 
+# 可视化
 def visualize_svm():
     def get_hyperplane_value(x, w, b, offset):
         return (-w[0] * x + b + offset) / w[1]
