@@ -1,3 +1,14 @@
+########################## 这部分是为了设置相对路径而作的改动 ##########################
+import os
+
+# 获取当前脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# 设置工作目录为当前脚本所在目录
+os.chdir(script_dir)
+# 打印当前工作目录以确认
+print("Current working directory:", os.getcwd())
+##################################################################################
+
 from math import sqrt
 from numpy import concatenate
 from matplotlib import pyplot

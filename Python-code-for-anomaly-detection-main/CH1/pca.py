@@ -11,19 +11,21 @@ from numpy.random import rand, multivariate_normal
 from sklearn import datasets
 
 iris = datasets.load_iris()
-nagasa = iris.data[:, 2]
-haba = iris.data[:, 3]
+nagasa = iris.data[:, 2]  # 提取花瓣长度特征
+haba = iris.data[:, 3]  # 提取花瓣宽度特征
 
 X = iris.data[:, 2:4]
-N = 150
+N = 150  # 样本数量
 
 
+# 数据中心化（将数据的每个特征减去其均值，使得每个特征的均值为零，消除特征之间的偏差，更好的捕捉数据内在结构和特征）
 def centering(X, N):
     # 中心化を行う行列
     H = np.eye(N) - 1.0 / N * np.ones([N, N])
     return DataFrame(np.dot(H, X), columns=["x", "y"])
 
 
+# 可视化 数据中心化后的数据
 df_center = centering(X, N)
 plt.scatter(df_center[0:50]["x"], df_center[0:50]["y"], c="blue", marker="o")
 plt.scatter(df_center[50:100]["x"], df_center[50:100]["y"], c="red", marker="o")

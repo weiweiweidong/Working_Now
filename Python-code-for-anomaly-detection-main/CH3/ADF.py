@@ -1,3 +1,7 @@
+"""
+    使用ADF来判断时间序列是否具有定常性
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
