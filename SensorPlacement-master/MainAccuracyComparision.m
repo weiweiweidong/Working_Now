@@ -68,6 +68,7 @@ end
 % end
 
 %***************** Initilize some used matrices and vectors **********
+% 初始化结果存储矩阵
 CriteriaMatrixConvex = zeros(3,MaxsensorNO-n+1);
 CriteriaMatrixFrameSense = zeros(3,MaxsensorNO-n+1);
 CriteriaMatrix_MNEP = zeros(3,MaxsensorNO-n+1);
@@ -82,7 +83,7 @@ SensorPositionMatrixMPME = zeros(MonteCarlNO,MaxsensorNO);
 SensorPositionMatrixFrame = cell(MonteCarlNO,MaxsensorNO-n+1);
 
 %% ********** Five methods:the results **************************
-
+% 运行5种方法并存储指标
 for MonteCarlNumber = 1:MonteCarlNO     
     V = DatabaseRandom{MonteCarlNumber,1};    
     %************ results of convex relaxation & FrameSense *************
@@ -139,6 +140,7 @@ end %end MonteCarlNumber
 %**************** End of SparSenSe, MNEP & MPME ***************************
 
 %***************** find the mean value **********************************
+% 计算平均值
 CriteriaMatrixConvex = CriteriaMatrixConvex./MonteCarlNO;
 CriteriaMatrixFrameSense = CriteriaMatrixFrameSense./MonteCarlNO;
 CriteriaMatrix_MNEP = CriteriaMatrix_MNEP./MonteCarlNO;
@@ -146,6 +148,7 @@ CriteriaMatrix_MPME = CriteriaMatrix_MPME./MonteCarlNO;
 CriteriaMatrix_Sparse =CriteriaMatrix_Sparse./MonteCarlNO;
 
 %% ********* Plot the comparison of five methods ******************
+% 画图比较5种方法
 SensorNumber = n:MaxsensorNO;
 OneMatrix = ones(size(SensorNumber));
 figure(1)
@@ -192,6 +195,7 @@ plot(SensorNumber,CriteriaMatrixConvex(3,:)','-ko',...
 
 %% ******** Five methods: Local Optimization ***********************
 %**************************************************************************  
+% 本地优化
 MaxiterationNO = 100; % for local optimization
 MSEMatrix_loc = zeros(5,MaxsensorNO-n+1);
 WCEVMatrix_loc = zeros(5,MaxsensorNO-n+1);
@@ -236,6 +240,7 @@ MSEMatrix_loc = MSEMatrix_loc./MonteCarlNO;
 WCEVMatrix_loc = WCEVMatrix_loc./MonteCarlNO;
 
 %% ******** Plot the results: Local optimization *******************
+% 打印本地优化结果
 figure(4)
 plot(SensorNumber,MSEMatrix_loc(1,:)','-ko',...    
      SensorNumber,MSEMatrix_loc(2,:)','-m*',... 
